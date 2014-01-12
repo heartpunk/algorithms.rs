@@ -26,10 +26,7 @@ impl IntTree {
 }
 
 fn main() {
-  let mut queue: DList<int> = DList::new();
-  queue.push_front(1);
-  queue.push_front(2);
-  println(queue.len().to_str());
+  let mut queue: DList<IntTree> = DList::new();
 
   let mut tree: IntTree = Branch(1, ~[Leaf(1)]);
   println(tree.to_str());
@@ -59,4 +56,40 @@ fn main() {
   // the tree topper!
   let one_tree: IntTree = Branch(1, ~[two_tree, three_tree]);
   println(one_tree.to_str());
+
+  let mut cur_node: IntTree;
+  let goal_int: int = 8;
+  queue.push_front(one_tree);
+
+  println("beginning BFS");
+  while true {
+    match queue.pop_back() {
+      Some(tree) => cur_node = tree,
+      None() => {
+        println("nope, it's not in here.");
+        break;
+      }
+    }
+    println(cur_node.to_str());
+    match cur_node {
+      Branch(8, _) => {
+          println("found it!");
+          break;
+        },
+      Leaf(8) => {
+          println("found it!");
+          break;
+        },
+      Branch(val, children) => {
+          for child in children.iter() {
+            queue.push_front(child.clone()); // I admitted defeat here. I wanted a pointer, but a clone is sufficient. D=
+            println("pushing child: " + child.to_str());
+          }
+        },
+      Leaf(_) => {
+        println("nope, it's not in here.");
+        break;
+      }
+    }
+  }
 }
