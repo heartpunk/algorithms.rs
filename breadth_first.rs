@@ -9,10 +9,10 @@ enum IntTree {
 }
 
 impl IntTree {
-  fn children (&self) -> Option<~[IntTree]> {
-    match self.clone() {
-      Branch(_, children) => Some(children.clone()),
-      Leaf(_) => None
+  fn children<'a> (&'a mut self) -> Option<&'a mut ~[IntTree]> {
+    match self {
+      &Branch(_, ref mut children) => Some(children),
+      &Leaf(_) => None
     }
   }
 
@@ -33,14 +33,13 @@ fn main() {
 
   let mut tree: IntTree = Branch(1, ~[Leaf(1)]);
   println(tree.to_str());
-  println(tree.children().to_str());
+  println((*tree.children().unwrap()).to_str());
   tree.add_child(10);
-  println(tree.children().to_str());
-  match tree.children() {
-    Some(children) => children[0].add_child(100), // this doensn't work because apparently the children are returned as immutable.
-    None => ()
-  };
-  println(tree.children().to_str());
+  println((*tree.children().unwrap()).to_str());
+  (*tree.children().unwrap())[0].add_child(100);
+  (*tree.children().unwrap())[0].add_child(100);
+  println((*tree.children().unwrap()).to_str());
+  println(tree.to_str());
 }
 
 // shape of test tree for BFS vs DFS
