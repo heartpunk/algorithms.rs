@@ -40,10 +40,23 @@ fn main() {
   (*tree.children().unwrap())[0].add_child(100);
   println((*tree.children().unwrap()).to_str());
   println(tree.to_str());
-}
 
-// shape of test tree for BFS vs DFS
-//          1
-//     2          3
-//  4    5     6     7
-// 8 9 10 11 12 13 14 15
+  // shape of test tree for BFS vs DFS
+  //          1
+  //     2          3
+  //  4    5     6     7
+  // 8 9 10 11 12 13 14 15
+
+  // FIXME: it shouldn't be so awkward to build this tree, should it?
+  // first layer has to be built first...
+  let four_tree: IntTree = Branch(4, ~[Leaf(8), Leaf(9)]);
+  let five_tree: IntTree = Branch(5, ~[Leaf(10), Leaf(11)]);
+  let six_tree: IntTree = Branch(6, ~[Leaf(12), Leaf(13)]);
+  let seven_tree: IntTree = Branch(7, ~[Leaf(14), Leaf(15)]);
+  // then we can build the second...
+  let two_tree: IntTree = Branch(2, ~[four_tree, five_tree]);
+  let three_tree: IntTree = Branch(3, ~[six_tree, seven_tree]);
+  // the tree topper!
+  let one_tree: IntTree = Branch(1, ~[two_tree, three_tree]);
+  println(one_tree.to_str());
+}
