@@ -8,36 +8,69 @@ enum IntTree {
   Leaf(int)
 }
 
-impl IntTree {
-  fn children<'a> (&'a mut self) -> Option<&'a mut ~[IntTree]> {
-    match self {
-      &Branch(_, ref mut children) => Some(children),
-      &Leaf(_) => None
+enum SearchStrategy {
+  BFS,
+  DFS
+}
+
+fn print_queue(queue: &DList<IntTree>) {
+  println("[");
+  for (elt, pos) in queue.iter().zip(range(0, queue.len())) {
+    print("  ");
+    print(elt.to_str());
+    if (pos != queue.len()) {
+      println(",");
     }
   }
+  println("]");
+}
 
-  fn add_child(&mut self, num: int) {
-    let new_self = match self.clone() {
-      Branch(val, children) => Branch(val, std::vec::append_one(children, Leaf(num))),
-      Leaf(val) => Branch(val, ~[Leaf(num)])
+fn search_int_tree(tree: &IntTree, goal_int: int, strategy: SearchStrategy) {
+  let mut cur_node: IntTree;
+  let mut queue: DList<IntTree> = DList::new();
+  queue.push_front(tree.clone());
+
+  match strategy {
+    BFS => println("\nbeginning BFS"),
+    DFS => println("\nbeginning DFS")
+  }
+  loop {
+    print_queue(&queue);
+    let next_node: Option<IntTree> = match strategy {
+      BFS => queue.pop_back(),
+      DFS => queue.pop_front()
     };
-    *self = new_self;
+    match next_node {
+      Some(tree) => cur_node = tree,
+      None() => {
+        println("nope, it's not in here.");
+        break;
+      }
+    }
+    println(cur_node.to_str());
+    match cur_node {
+      Branch(val, children) => {
+          if (val == goal_int) {
+            println("found it!");
+            break;
+          } else {
+            for child in children.iter() {
+              queue.push_front(child.clone()); // I admitted defeat here. I wanted a pointer, but a clone is sufficient. D=
+              println("pushing child: " + child.to_str());
+            }
+          }
+        },
+      Leaf(val) => {
+        if (val == goal_int) {
+          println("found it!");
+          break;
+        }
+      }
+    }
   }
 }
 
 fn main() {
-  let mut queue: DList<IntTree> = DList::new();
-
-  let mut tree: IntTree = Branch(1, ~[Leaf(1)]);
-  println(tree.to_str());
-  println((*tree.children().unwrap()).to_str());
-  tree.add_child(10);
-  println((*tree.children().unwrap()).to_str());
-  (*tree.children().unwrap())[0].add_child(100);
-  (*tree.children().unwrap())[0].add_child(100);
-  println((*tree.children().unwrap()).to_str());
-  println(tree.to_str());
-
   // shape of test tree for BFS vs DFS
   //          1
   //     2          3
@@ -55,41 +88,9 @@ fn main() {
   let three_tree: IntTree = Branch(3, ~[six_tree, seven_tree]);
   // the tree topper!
   let one_tree: IntTree = Branch(1, ~[two_tree, three_tree]);
-  println(one_tree.to_str());
 
-  let mut cur_node: IntTree;
   let goal_int: int = 8;
-  queue.push_front(one_tree);
 
-  println("beginning BFS");
-  while true {
-    match queue.pop_back() {
-      Some(tree) => cur_node = tree,
-      None() => {
-        println("nope, it's not in here.");
-        break;
-      }
-    }
-    println(cur_node.to_str());
-    match cur_node {
-      Branch(8, _) => {
-          println("found it!");
-          break;
-        },
-      Leaf(8) => {
-          println("found it!");
-          break;
-        },
-      Branch(val, children) => {
-          for child in children.iter() {
-            queue.push_front(child.clone()); // I admitted defeat here. I wanted a pointer, but a clone is sufficient. D=
-            println("pushing child: " + child.to_str());
-          }
-        },
-      Leaf(_) => {
-        println("nope, it's not in here.");
-        break;
-      }
-    }
-  }
+  search_int_tree(&one_tree.clone(), goal_int, BFS);
+  search_int_tree(&one_tree.clone(), goal_int, DFS);
 }
